@@ -1,0 +1,1173 @@
+/* ==========================================================================
+   Phase 3 built the layout; Phase 4 gave it colours and fonts.
+
+   The Phase 4 swap only changed the values in :root below and added the
+   @font-face block — the layout rules further down were left alone, which
+   was the whole point of defining reusable values up here first.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fonts — self-hosted from assets/fonts/ rather than loaded from Google, so
+   there's no third-party request and nothing to slow the page down or track
+   visitors. Both are SIL Open Font License 1.1; the licence text ships
+   alongside the files in assets/fonts/, which that licence requires.
+
+   font-display: swap shows the fallback font immediately and swaps the real
+   one in when it arrives, so text is never invisible while a font loads.
+   -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../assets/fonts/space-grotesk-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../assets/fonts/space-grotesk-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../assets/fonts/space-grotesk-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../assets/fonts/jetbrains-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Spacing scale. Fixed steps rather than arbitrary values so vertical
+     rhythm stays consistent — pick the nearest step, don't invent a new one. */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  /* clamp(min, preferred, max): scales with viewport width but never below
+     2.25rem or above 3.5rem. Replaces a media query for fluid headings. */
+  --text-3xl: clamp(2.25rem, 6vw, 3.5rem);
+
+  /* The two widths behind the hybrid layout: prose is capped narrow for
+     comfortable reading, card grids get the wider track. */
+  --width-text: 42rem;
+  --width-wide: 68rem;
+  /* Project cards are a fixed width, so the layout can gain a column without the
+     card ever changing size. There are two sizes, not one: this base value, and a
+     larger one applied to #projects once the page reaches its full width. The card
+     therefore only ever *grows* on a wider screen, which is safe — it was cards
+     getting *smaller* on a wider screen that broke this section twice before.
+
+     25rem (400px) is the base, chosen so two columns fit a 912px-wide window —
+     a Surface Pro 7 at 300% display scaling, and narrower than any laptop at full
+     screen. Two cards plus the 2rem gap need 832px of the content box.
+
+     Whatever these values become, never size them to fit *exactly*. The first
+     attempt used 31.5rem because 2 x 504 + 32 = 1040 matched the content box to
+     the pixel. Since the section is capped at 68rem that sum then sat precisely on
+     the boundary at every screen width, so the browser only had to round a
+     fraction of a pixel the wrong way to decide a second column didn't fit — and
+     one column was all you got, on any monitor. Leave slack. */
+  --width-project-card: 25rem;
+  /* How far the nav pill shrinks once the header is stuck. script.js overwrites
+     this with the pill's exact measured content width, so the pill ends up as
+     narrow as it can be without its text wrapping. This value is only the
+     starting point used before that measurement happens. */
+  --width-nav-pinned: 56rem;
+
+  --radius-sm: 8px;
+  --radius-card: 20px;
+
+  --header-height: 4rem;
+
+  /* One duration and one easing curve shared by everything in the header, so a
+     single tap reads as one movement rather than three racing each other.
+     The curve starts fast and settles gently, which feels more responsive than
+     the browser's default `ease`. --motion-stagger is the gap between each nav
+     link appearing; it's zeroed under prefers-reduced-motion further down. */
+  --motion-duration: 200ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --motion-stagger: 30ms;
+
+  /* The system fonts stay on the end of each stack as a fallback, so the site
+     is still readable in the moment before the real fonts load — or if they
+     fail to load entirely. */
+  --font-body: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Headings are set tighter than body text. Large type looks loose at normal
+     letter-spacing; pulling it in slightly is what makes it read as deliberate. */
+  --tracking-heading: -0.03em;
+
+  /* Palette: white with a deep teal accent (Alexander's pick in Phase 4).
+     Greys are very slightly warm; teal is the only saturated colour, which is
+     what keeps it feeling calm. Every pair here was checked against WCAG —
+     the lowest is 5.80:1 for muted text on a card, against a 4.5:1 minimum. */
+  --color-bg: #ffffff;
+  --color-surface: #f7f7f5;
+  --color-media: #e9e9e5;
+  --color-text: #17181a;
+  --color-text-soft: #34363a;
+  --color-text-muted: #5e6165;
+  --color-border: #e4e4e0;
+  --color-accent: #16624f;
+  --color-accent-strong: #0f4a3b;
+  /* Text placed on top of the accent colour, e.g. the resume button's label. */
+  --color-accent-ink: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Reset
+   Browsers ship different default margins and padding. Zeroing the ones we
+   care about means we style from a known baseline instead of overriding
+   each browser's guesses.
+   -------------------------------------------------------------------------- */
+
+/* border-box makes width include padding and border, so a 300px box with
+   20px padding is 300px wide — not 340px as the default content-box gives. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1, h2, h3, h4,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+/* Only strips bullets from lists we've explicitly classed (nav, tags, links).
+   Unclassed lists — the bullet points under each job — keep their markers. */
+ul[class] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* height: auto is not optional here. Every <img> on this site carries real
+   width/height attributes so the browser can reserve the right shape before the
+   file arrives — but the browser treats those attributes as actual CSS values.
+   Without this line an image whose width we've set in CSS keeps the *attribute's*
+   height, so a 900x600 file drawn 432px wide still claims 600px of height and
+   stretches its box tall. This is the standard modern image reset for exactly
+   that reason. */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Form controls don't inherit font from body by default — a long-standing
+   browser quirk that otherwise leaves inputs rendering in Times New Roman. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Anchor links would otherwise scroll the target underneath the sticky header.
+   Reserving the header's height keeps section headings visible. The extra
+   --space-2xs is only a small clearance so the heading doesn't sit flush against
+   the header bar; anything larger reads as an unwanted gap on a nav jump. */
+html {
+  scroll-padding-top: calc(var(--header-height) + var(--space-2xs));
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Base typography
+   -------------------------------------------------------------------------- */
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* text-wrap: balance evens out the line lengths of a heading that wraps, so
+   you don't get five words then one lonely word on the second line. */
+h1, h2 {
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
+  text-wrap: balance;
+}
+
+/* Subheadings sit at the medium weight — 600 isn't one of the weights we ship,
+   so asking for it would make the browser fake a bolder version of 500. */
+h3 {
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-lg); }
+
+a {
+  color: inherit;
+}
+
+/* Every focusable thing gets the same clearly visible ring. Browsers do provide
+   a default outline, but it's easy to lose against a light background — and
+   :focus-visible means it only appears for keyboard users, not on mouse clicks. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Monospace for metadata and small labels — the one nod to the terminal-ish
+   feel from the inspiration sites, kept to small text so it stays readable. */
+.hero__meta,
+.experience-item__meta,
+.project-card__tag,
+.site-nav__links {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Section layout
+   Every section shares the wide track and the same left edge; prose inside
+   is capped narrower. Consistent left alignment across differing widths is
+   what keeps the ragged right edge looking deliberate rather than sloppy.
+   -------------------------------------------------------------------------- */
+
+/* Top and bottom padding are deliberately uneven, not a shared padding-block.
+   The sticky header already reserves space above wherever a nav link jumps to
+   (see html { scroll-padding-top } below) — a large top padding here as well
+   would stack on top of that and leave a big empty gap above the heading.
+   Most of the breathing room between sections instead lives in the bottom
+   padding, which isn't affected by that jump behaviour. */
+main > section {
+  max-width: var(--width-wide);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block-start: var(--space-sm);
+  padding-block-end: var(--space-2xl);
+}
+
+main > section > h2 {
+  margin-bottom: var(--space-lg);
+}
+
+/* Narrower, centred sections: the whole section box (heading included) is
+   capped to the prose width and centred, rather than just the text inside
+   it — so both the heading and the paragraph line up on the same left edge
+   of a block that itself sits in the middle of the page. Skills and Projects
+   are deliberately left out: they're card grids, not blocks of reading text,
+   so they keep the full wide track (Phase 3 decision, still stands). */
+#hero,
+#gallery,
+#about,
+#experience,
+#contact {
+  max-width: var(--width-text);
+}
+
+/* Running text sits a shade lighter than headings. Near-black everywhere makes
+   a page of prose feel heavier than it needs to; this still passes contrast
+   comfortably at 12.11:1. */
+#about p,
+.contact-intro,
+.experience-item li {
+  color: var(--color-text-soft);
+}
+
+/* Space between stacked paragraphs. Using the sibling selector means the first
+   paragraph doesn't get a stray gap above it, so the heading spacing stays as set. */
+#about p + p {
+  margin-top: var(--space-sm);
+}
+
+.contact-intro {
+  max-width: var(--width-text);
+  margin-bottom: var(--space-lg);
+}
+
+@media (min-width: 48rem) {
+  main > section {
+    padding-inline: var(--space-lg);
+    padding-block-start: var(--space-md);
+    padding-block-end: var(--space-3xl);
+  }
+}
+
+/* Hides an element from the screen while keeping it available to screen readers.
+   `display: none` would remove it from both, which defeats the purpose. The
+   1px-clipped-box approach is the long-standing way to do this reliably. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Skip link
+   Parked off-screen until focused, so it's invisible to mouse users but the
+   first thing a keyboard user reaches. Kept instant, not animated — it needs
+   to be usable the moment it appears.
+   -------------------------------------------------------------------------- */
+
+.skip-link {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 100;
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   Header / nav
+
+   Two states. At the top of the page it's an ordinary full-width bar. Once you
+   scroll far enough that the header sticks, script.js adds `is-pinned` and it
+   morphs into a floating rounded pill with the page visible around it.
+
+   The bar is the default and the pill is the addition, so if the JavaScript
+   never runs the header simply stays a bar — which is a perfectly good header.
+   -------------------------------------------------------------------------- */
+
+/* Sits directly above the header. It's only there to be watched: once this
+   scrolls out of view the header must have become stuck, which is a cheaper
+   and more reliable signal than listening to every scroll event. */
+.header-sentinel {
+  height: 1px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  /* Properties are listed individually rather than using `all`, so the browser
+     only watches what actually changes. */
+  transition: background-color var(--motion-duration) var(--motion-ease),
+              border-color var(--motion-duration) var(--motion-ease),
+              padding-block-start var(--motion-duration) var(--motion-ease);
+}
+
+.site-header.is-pinned {
+  /* Transparent so the page shows through around the floating pill. */
+  background-color: transparent;
+  border-bottom-color: transparent;
+  padding-block-start: var(--space-2xs);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-md);
+  max-width: var(--width-wide);
+  min-height: var(--header-height);
+  margin-inline: auto;
+  padding: var(--space-xs) var(--space-md);
+  /* Transparent border in the resting state so gaining a visible one when
+     pinned doesn't change the element's size and nudge the layout. */
+  border: 1px solid transparent;
+  border-radius: 0;
+  transition: max-width var(--motion-duration) var(--motion-ease),
+              border-radius var(--motion-duration) var(--motion-ease),
+              background-color var(--motion-duration) var(--motion-ease),
+              border-color var(--motion-duration) var(--motion-ease),
+              box-shadow var(--motion-duration) var(--motion-ease),
+              min-height var(--motion-duration) var(--motion-ease);
+}
+
+.is-pinned .site-nav {
+  max-width: var(--width-nav-pinned);
+  min-height: calc(var(--header-height) - var(--space-2xs));
+  border-radius: 999px;
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: 0 6px 24px rgb(23 24 26 / 0.10);
+  /* The pill is only as wide as its contents, so this gap is the whole reason
+     the brand and the links (or the menu button) aren't touching. */
+  column-gap: var(--space-lg);
+}
+
+/* Held for a single frame while script.js measures the pill.
+
+   max-content shrinks the nav to exactly the width its contents need — which is
+   the number we want, but not one CSS can animate toward, hence measuring it and
+   handing it back as pixels. `is-pinned` is applied too so the measurement
+   includes the pinned state's own spacing, and transitions are switched off so
+   none of this is ever visible. */
+.site-header.is-measuring,
+.site-header.is-measuring .site-nav {
+  transition: none;
+}
+
+.site-header.is-measuring .site-nav {
+  max-width: none;
+  width: max-content;
+}
+
+/* A closed menu panel is still in the layout — it's only zero height, not gone —
+   so max-content sizing counts it and widens the pill to fit the longest link,
+   which nobody can see. Taking it out of the flow for the measurement keeps the
+   pill as narrow as its visible contents. Skipped when the menu is open, since
+   then the panel is real content that has to fit. */
+.site-header.is-measuring .site-nav__links:not(.is-open) {
+  display: none;
+}
+
+/* An open menu turns the pill into a panel, and a 999px radius on a tall box
+   bulges oddly — so soften it while the menu is open. :has() lets the parent
+   react to its own contents; where it isn't supported the pill just stays
+   rounder, which is cosmetic rather than broken. */
+.is-pinned .site-nav:has(.site-nav__links.is-open) {
+  border-radius: var(--radius-card);
+}
+
+.site-nav__brand {
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-nav__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.site-nav__links a {
+  text-decoration: none;
+}
+
+.site-nav__links a:hover,
+.site-nav__links a:focus-visible {
+  color: var(--color-accent);
+}
+
+/* Hidden by default. Only the `has-js` class — added by script.js — turns the
+   menu button on, so without JavaScript the links stay visible and usable. */
+.nav-toggle {
+  display: none;
+  /* No border, no background: the three bars are the whole control (Alexander's
+     call). Everything a button normally brings with it has to be turned off
+     explicitly, because browsers give every <button> a border and a grey face. */
+  padding: 0;
+  border: 0;
+  background: none;
+  /* Sized to the icon itself, so the button can't make the pill any taller than
+     the name sitting beside it does. 1.25rem is the width of the bars; 0.875rem
+     is the distance from the top bar to the bottom one. It's also what the focus
+     ring now wraps, since there's no box left to outline. */
+  width: 1.25rem;
+  height: 0.875rem;
+  /* Anchor for the tap area below. */
+  position: relative;
+  cursor: pointer;
+}
+
+/* A 2px-tall bar is nowhere near something you can reliably hit with a thumb,
+   and the visible box that used to be the target is gone. This is an invisible
+   44px one — the size a fingertip needs — centred on the icon. It's positioned
+   rather than padded so it can be larger than the button without taking up any
+   room and pushing the pill taller. */
+.nav-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  transform: translate(-50%, -50%);
+}
+
+/* The bars pick up the accent colour on hover, matching what the nav links
+   already do — with the box gone, this is the only thing left to confirm the
+   button is a button. Listed before the open state below so that the middle
+   bar still disappears while the menu is open. */
+.nav-toggle:hover .nav-toggle__icon,
+.nav-toggle:hover .nav-toggle__icon::before,
+.nav-toggle:hover .nav-toggle__icon::after {
+  background-color: var(--color-accent);
+}
+
+/* Three bars drawn from one element: the span itself is the middle bar, and its
+   two pseudo-elements are the outer two — cheaper than three extra spans. */
+.nav-toggle__icon,
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  display: block;
+  width: 1.25rem;
+  height: 2px;
+  background-color: var(--color-text);
+}
+
+.nav-toggle__icon {
+  position: relative;
+}
+
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.nav-toggle__icon::before { top: -6px; }
+.nav-toggle__icon::after { top: 6px; }
+
+/* The three bars turn into an X while the panel opens. Rotating and fading are
+   the two things a browser can hand straight to the graphics card, so this stays
+   smooth even on a slow phone — and giving the eye something continuous to
+   follow for the whole 200ms is most of what "smooth" actually means.
+
+   transform-origin is stated rather than left to the default, so it's obvious
+   the bars pivot around their own middle. */
+.nav-toggle__icon,
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  transform-origin: center;
+  transition: transform var(--motion-duration) var(--motion-ease),
+              background-color var(--motion-duration) var(--motion-ease);
+}
+
+/* Styled off aria-expanded rather than a class of our own: the attribute is
+   already there for screen readers, so tying the visuals to it means the two
+   can never disagree about whether the menu is open. */
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon {
+  /* Transparent, not opacity or scale: the outer two bars are this element's
+     pseudo-elements — its children — so fading or shrinking it would take them
+     with it, and there'd be no X left to see. */
+  background-color: transparent;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Flex purely to centre the bars: with the padding gone, the icon would
+   otherwise sit at the top-left corner of that 44px tap target. */
+.site-nav.has-js .nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The panel now sits in the layout permanently (see below), so the nav's row gap
+   would add space above it even while it's closed and leave the pill taller than
+   it should be. The panel's own padding-top provides that spacing instead. */
+.site-nav.has-js {
+  row-gap: 0;
+}
+
+/* The collapsed menu.
+
+   It is deliberately NOT switched off with `display: none`, even though that's
+   the obvious way to hide something. `display` is on or off with nothing in
+   between, so a browser has no way to animate it — the panel would appear in a
+   single frame and the pill's height would jump. Height *can* be animated, so
+   the panel stays in the layout at zero height and grows from there, which is
+   what makes the pill unroll instead of snapping open.
+
+   `visibility: hidden` is what keeps a closed panel out of the tab order and
+   away from screen readers; `height: 0` alone would not do that. It's in the
+   transition list so that on the way closed the links stay on screen for the
+   whole animation and only disappear at the very end.
+
+   width: 100% makes the panel take a whole flex row of its own, which drops it
+   below the brand and button without needing absolute positioning. */
+.site-nav.has-js .site-nav__links {
+  /* The panel's own breathing room, named here because two rules need the same
+     numbers: the open state applies them, and the open height has to add them on
+     top of what script.js measured. --menu-pad-end is the 4px the last link's
+     focus ring needs, which the overflow clipping would otherwise cut off. */
+  --menu-pad-start: var(--space-xs);
+  --menu-pad-end: var(--space-3xs);
+  display: flex;
+  flex-direction: column;
+  /* Must be nowrap here. The list wraps by default, and a wrapping column that
+     has been squeezed to zero height would push each link into a column of its
+     own, side by side — which is both wrong to look at and the wrong number for
+     script.js to measure. */
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 0;
+  gap: var(--space-xs);
+  /* Zero when closed, and animated open with the height. It has to be zero:
+     padding is NOT swallowed by `height: 0` — when a height is smaller than the
+     padding the content area collapses but the padding still takes up space, so
+     leaving it on would keep a 16px strip under the brand and button and stop
+     them looking vertically centred in the pill. */
+  padding-block: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: height var(--motion-duration) var(--motion-ease),
+              padding-block-start var(--motion-duration) var(--motion-ease),
+              padding-block-end var(--motion-duration) var(--motion-ease),
+              visibility var(--motion-duration);
+}
+
+/* script.js measures the panel and writes --nav-menu-height onto it just before
+   opening — a browser can't animate towards `auto`, the same problem the pill's
+   width had.
+
+   That measurement is taken while the panel is closed and therefore has no
+   padding, so the padding is added back on here. */
+.site-nav.has-js .site-nav__links.is-open {
+  height: calc(var(--nav-menu-height, 0px) + var(--menu-pad-start) + var(--menu-pad-end));
+  padding-block-start: var(--menu-pad-start);
+  padding-block-end: var(--menu-pad-end);
+  visibility: visible;
+}
+
+.site-nav.has-js .site-nav__links li {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 160ms var(--motion-ease),
+              transform 160ms var(--motion-ease);
+  /* --i is the link's position in the list, set on the open state below. It
+     falls back to 0 whenever the menu is closed, so closing has no stagger —
+     a menu that takes its time going away feels unresponsive. The delay is
+     written after the shorthand above, which would otherwise reset it to 0. */
+  transition-delay: calc(var(--i, 0) * var(--motion-stagger));
+}
+
+.site-nav.has-js .site-nav__links.is-open li {
+  opacity: 1;
+  transform: none;
+}
+
+/* Each link starts one --motion-stagger after the one above it, so the list
+   reads top to bottom instead of arriving all at once. */
+.site-nav.has-js .site-nav__links.is-open li:nth-child(2) { --i: 1; }
+.site-nav.has-js .site-nav__links.is-open li:nth-child(3) { --i: 2; }
+.site-nav.has-js .site-nav__links.is-open li:nth-child(4) { --i: 3; }
+.site-nav.has-js .site-nav__links.is-open li:nth-child(5) { --i: 4; }
+
+/* Above the breakpoint there's room for the full list, so the button goes away
+   and the links become an ordinary row again — collapsing, and every bit of
+   motion that goes with it, only exists below this width. `.is-open` is listed
+   alongside so a menu left open on a narrow screen can't leak its collapsed
+   styles into the desktop layout. */
+@media (min-width: 48rem) {
+  .site-nav.has-js {
+    row-gap: var(--space-xs);
+  }
+
+  .site-nav.has-js .nav-toggle {
+    display: none;
+  }
+
+  /* Up here the links are the pill's actual content, so they must be part of the
+     measurement — undoing the hide that the collapsed layout needs. */
+  .site-header.is-measuring .site-nav__links:not(.is-open) {
+    display: flex;
+  }
+
+  .site-nav.has-js .site-nav__links,
+  .site-nav.has-js .site-nav__links.is-open {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+    height: auto;
+    gap: var(--space-sm) var(--space-md);
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: visible;
+    visibility: visible;
+    transition: none;
+  }
+
+  .site-nav.has-js .site-nav__links li {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* All of the header motion is decorative, so it goes away entirely for anyone
+   who has asked their system to reduce motion. Every state still switches and
+   the menu still opens — it just happens instantly. Zeroing --motion-stagger
+   here is what stops the links arriving as a series of tiny pauses instead. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-stagger: 0ms;
+  }
+
+  .site-header,
+  .site-nav,
+  .site-nav__links,
+  .site-nav__links li,
+  .nav-toggle__icon,
+  .nav-toggle__icon::before,
+  .nav-toggle__icon::after {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+/* A touch more space above the name than other sections get at their top,
+   since the hero is the very first thing on the page.
+
+   The bottom padding overrides the standard section spacing so the button sits
+   close to the photos below it — the name, the button and the slideshow read as
+   one opening block rather than as separate sections. */
+.hero {
+  padding-block-start: var(--space-xl);
+  padding-block-end: var(--space-sm);
+}
+
+/* Centred under the left-aligned name above it. `display: block` plus auto side
+   margins is what does the centring; `width: fit-content` stops the block
+   stretching the full width of the column, which would make the button itself
+   enormous rather than centred. */
+.hero .button {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.hero__meta {
+  margin-top: var(--space-sm);
+}
+
+.button {
+  display: inline-block;
+  margin-top: var(--space-lg);
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 500;
+  text-decoration: none;
+  /* The only transition on the site: a short colour fade on deliberate
+     interaction. Purposeful feedback rather than decoration. */
+  transition: background-color 120ms ease, border-color 120ms ease,
+              color 120ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background-color: var(--color-accent-strong);
+}
+
+/* Anyone who has asked their system to reduce motion gets no transitions at
+   all — the colour still changes, it just changes instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Photo slideshow
+
+   Every photo is shown whole (Alexander's choice) rather than cropped to a
+   common shape, so the frame is a fixed height and each image sits inside it
+   at its own width — portraits tall and narrow, landscapes wide. A fixed
+   height is what stops the page jumping as the slides change.
+   -------------------------------------------------------------------------- */
+
+/* The photos and the About text are one thought, not two sections, so this sits
+   close to the About heading rather than a full section's distance from it.
+   Overrides the standard bottom padding every other section gets. */
+#gallery {
+  padding-block-end: var(--space-sm);
+}
+
+.gallery__viewport {
+  position: relative;
+  /* Square, because the photos are a mix of portrait and landscape and no single
+     landscape frame suits both — in a wide frame the portraits ended up filling
+     barely a third of it, marooned in grey. A square is the shape that treats
+     both fairly: portraits fill ~56%, landscapes ~61%.
+
+     Sizing by ratio rather than a fixed height also means the frame grows and
+     shrinks with the page, so the photos stay proportionally the same size at
+     every width instead of shrinking into the middle of a fixed box.
+
+     It's still one shape for every slide, so nothing jumps as they cycle. */
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  /* Keeps the crossfading slides inside the rounded corners. */
+  overflow: hidden;
+}
+
+/* Slides are stacked on top of each other rather than in a row, so changing
+   photo is a crossfade of opacity — which the browser can do on the compositor
+   without re-laying out the page. */
+.gallery__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: var(--space-sm);
+  opacity: 0;
+  /* opacity alone would leave the hidden slides reachable by a screen reader
+     and by tabbing; visibility is what actually takes them out. */
+  visibility: hidden;
+  transition: opacity 400ms ease, visibility 400ms;
+}
+
+.gallery__slide.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* min-height: 0 lets a flex child shrink below its natural size — without it
+   the image refuses to shrink and pushes the caption out of the frame. */
+.gallery__slide img {
+  min-height: 0;
+  flex: 1;
+  width: auto;
+  max-width: 100%;
+  /* contain fits the whole photo inside the space without cropping any of it. */
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.gallery__slide figcaption {
+  flex: none;
+  max-width: 34rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  text-wrap: balance;
+}
+
+/* Hidden until script.js proves it can drive them. */
+.gallery__arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* 44px is the smallest comfortable tap target on a touchscreen. */
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  /* Stops a phone waiting to see if a tap is a double-tap zoom, which otherwise
+     adds a noticeable delay before the photo changes. */
+  touch-action: manipulation;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.gallery.has-js .gallery__arrow {
+  display: flex;
+}
+
+.gallery__arrow--prev { left: var(--space-xs); }
+.gallery__arrow--next { right: var(--space-xs); }
+
+.gallery__arrow svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.gallery__arrow:hover,
+.gallery__arrow:focus-visible {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* No breakpoint needed any more — the square frame scales with the page on its
+   own, which is the whole reason for using a ratio instead of a fixed height. */
+
+/* Reduced motion: slides swap instantly instead of fading. script.js also stops
+   advancing them on its own, so nothing here moves without being asked to. */
+@media (prefers-reduced-motion: reduce) {
+  .gallery__slide,
+  .gallery__arrow {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Experience
+   -------------------------------------------------------------------------- */
+
+.experience-item + .experience-item {
+  margin-top: var(--space-xl);
+}
+
+.experience-item__company {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.experience-item__meta {
+  margin-top: var(--space-3xs);
+}
+
+.experience-item ul {
+  margin-top: var(--space-xs);
+  padding-left: var(--space-md);
+}
+
+.experience-item li {
+  margin-top: var(--space-3xs);
+}
+
+/* --------------------------------------------------------------------------
+   Skills
+   auto-fit + minmax builds a responsive grid with no media query: columns
+   are at least 15rem wide, and the browser fits as many as the space allows.
+   -------------------------------------------------------------------------- */
+
+#skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Heading spans every column so the grid starts on the row beneath it. Its
+   margin is zeroed because the grid's own `gap` already provides that spacing
+   — leaving both would double it. */
+#skills > h2,
+#projects > h2 {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.skill-group h3 {
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skill-group ul {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-xs);
+}
+
+.skill-group li {
+  margin-top: var(--space-3xs);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Projects
+   -------------------------------------------------------------------------- */
+
+/* Cards are one fixed size and stay that size. This is the rule that guarantees
+   a card can never get *smaller* on a *wider* screen — the bug that bit this
+   section before, when switching to two columns at 48rem dropped each card from
+   504px to 288px and made the dashboard screenshot unreadable. Because the track
+   is a fixed width rather than a share of the row, gaining a second column
+   changes nothing about the first one: the card is 504px in both layouts, so the
+   step at the changeover is zero pixels.
+
+   Both halves of the minmax() matter:
+   - max is --width-project-card, which is what pins the size.
+   - min is min(--width-project-card, 100%). Below ~552px there isn't room for a
+     whole card, and a bare fixed minimum would overflow and scroll the page
+     sideways; the min() lets the track fall back to the container's width.
+
+   justify-content centres the tracks, so a single column sits in the middle of
+   the page rather than hugging the left edge. The h2 spans the tracks (see the
+   Skills section), so the heading travels with the cards and stays aligned to
+   the left edge of the first one.
+
+   Sizing: the content box is the section's 68rem cap minus 2x --space-md padding,
+   so 1040px at most. Two 400px cards plus a 32px gap need 832 of it, which arrives
+   at roughly 895px of window (allowing for a scrollbar). Three would need 1264 and
+   so can never fit, at either card size. */
+#projects {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(var(--width-project-card), 100%), var(--width-project-card))
+  );
+  justify-content: center;
+}
+
+.project-card {
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+}
+
+/* The files already ship at exactly 3:2 (scripts/optimise-photos.py crops them
+   there), so aspect-ratio and object-fit are belt-and-braces: together they mean
+   a differently-shaped image dropped in later gets cropped to fit rather than
+   stretching itself or changing the card's height. The background colour shows
+   in the slot's place while the file is still downloading. */
+.project-card__media {
+  display: block;
+  width: 100%;
+  /* Repeated from the img reset on purpose: aspect-ratio only gets to decide a
+     dimension that is auto, so if height were ever pinned again this rule would
+     silently stop shaping the slot. */
+  height: auto;
+  aspect-ratio: 3 / 2;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-media);
+  object-fit: cover;
+}
+
+.project-card__tag {
+  display: inline-block;
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+.project-card p {
+  margin-top: var(--space-2xs);
+  color: var(--color-text-muted);
+}
+
+/* Only the gap widens here — the column count looks after itself above. */
+@media (min-width: 48rem) {
+  #projects {
+    gap: var(--space-lg);
+  }
+}
+
+/* The second, larger card size, from the width at which the page stops growing
+   and the content box is a full 1040px. Two 480px cards plus the gap need 992 of
+   that, leaving 48px of slack.
+
+   This is the project's second breakpoint, against the "one breakpoint" rule in
+   CLAUDE.md, and it earns its place: one fixed card width cannot be both small
+   enough to pair up on a 912px screen and large enough to make use of a 1920px
+   one, and this section's recurring problem has been card images ending up too
+   small to read. The card grows from 400px to 480px here — it never shrinks, so
+   the bug this section keeps hitting cannot come back through this rule.
+
+   Set on #projects rather than :root because nothing outside this section uses
+   the value; keeping it local means a future reader finds it next to the grid it
+   affects. */
+@media (min-width: 68rem) {
+  #projects {
+    --width-project-card: 30rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Contact
+
+   No form here by design. The contact form and the Express backend behind it
+   were cancelled in Phase 6 so the site can stay fully static — see CLAUDE.md
+   before adding one back.
+   -------------------------------------------------------------------------- */
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* .button carries its own top margin because in the hero it follows a paragraph
+   directly. Here the space above comes from .contact-intro's margin-bottom, and
+   two buttons side by side must not each add their own on top of it. */
+.contact-actions .button {
+  margin-top: 0;
+}
+
+/* The secondary action: the same shape as the primary button but outlined rather
+   than filled, so the ranking between the two reads at a glance. Teal text on the
+   white background measures 7.26:1 against a 4.5:1 minimum; on hover it darkens
+   to accent-strong on the surface grey, 9.49:1. */
+.button--secondary {
+  background-color: transparent;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.button--secondary:hover,
+.button--secondary:focus-visible {
+  background-color: var(--color-surface);
+  border-color: var(--color-accent-strong);
+  color: var(--color-accent-strong);
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  max-width: var(--width-wide);
+  margin-inline: auto;
+  padding: var(--space-lg) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

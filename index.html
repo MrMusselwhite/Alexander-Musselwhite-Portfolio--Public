@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alexander Musselwhite — Portfolio</title>
+  <meta name="description" content="Alexander Musselwhite — Data &amp; Business Analyst portfolio. Digital Business &amp; Data graduate specializing in analytics, automation, and commercial insight.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Visually hidden until it receives keyboard focus (CSS in Phase 3) — lets keyboard/screen-reader
+       users jump straight past the nav instead of tabbing through every link first. -->
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- Watched by script.js: the moment this scrolls out of view, the sticky header
+       must have latched to the top of the screen, which is when it becomes a pill.
+       aria-hidden because it's a measuring device, not content. -->
+  <div class="header-sentinel" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#hero" class="site-nav__brand">Alex Musselwhite</a>
+
+      <!-- Hidden by CSS until script.js marks the nav as script-enabled, so if the
+           JavaScript never loads the visitor gets the plain wrapping list rather than
+           a menu button that does nothing. aria-expanded is what tells a screen reader
+           whether the menu is currently open; aria-controls points at what it opens. -->
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+        <span class="nav-toggle__icon" aria-hidden="true"></span>
+      </button>
+
+      <!-- role="list" restores list semantics that Safari/VoiceOver drops when
+           CSS removes the bullets. Needed on every list we style bullet-less. -->
+      <ul class="site-nav__links" id="nav-menu" role="list">
+        <li><a href="#about">About</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Each section below is labelled via aria-labelledby pointing at its own heading, so a screen
+       reader announces "About", "Experience", etc. when entering it — not just "section". -->
+  <main id="main">
+    <section id="hero" class="hero" aria-labelledby="hero-heading">
+      <h1 id="hero-heading">Alexander Musselwhite</h1>
+      <p class="hero__meta">Amsterdam, NL · Open to opportunities · EU &amp; UK work authorized</p>
+      <!-- download attribute tells the browser to save the linked file instead of navigating to it. -->
+      <a class="button" href="assets/Alexander-Musselwhite-CV.pdf" download>Download Resume</a>
+    </section>
+
+    <!-- A slideshow rather than a grid, so the photos don't dominate the page above
+         About. Every slide is in the markup from the start and CSS shows the first
+         one; script.js only adds the cycling and reveals the arrows, so with no
+         JavaScript this degrades to a single photo rather than to nothing.
+
+         aria-label names the section because it has no visible heading of its own. -->
+    <section id="gallery" class="gallery" aria-label="Photos of Alexander">
+      <div class="gallery__viewport">
+        <figure class="gallery__slide is-active">
+          <!-- width/height are the file's real pixel dimensions. They don't set the
+               displayed size — CSS does that — they let the browser reserve the right
+               shape before the image arrives, so the page doesn't lurch as it loads.
+               This first slide is the one visible immediately, so it loads eagerly at
+               high priority; the rest wait. -->
+          <img src="assets/images/alex-portrait.webp" width="850" height="1100"
+               fetchpriority="high"
+               alt="Alexander sitting on a bench with his arms folded, wearing sunglasses and smiling. Black and white photograph.">
+
+        </figure>
+
+        <figure class="gallery__slide">
+          <img src="assets/images/band.webp" width="1400" height="945" loading="lazy"
+               alt="Four band members playing outdoors under a parasol on a sunny day, Alexander in the centre with an electric guitar.">
+          <figcaption>Playing with one of my former rock bands.</figcaption>
+        </figure>
+
+        <figure class="gallery__slide">
+          <img src="assets/images/bouldering.webp" width="880" height="1100" loading="lazy"
+               alt="A climber mid-move on a steep indoor bouldering wall covered in colourful holds.">
+          <figcaption>Bouldering at 6c, working towards 7a by the end of the year.</figcaption>
+        </figure>
+
+        <figure class="gallery__slide">
+          <img src="assets/images/climbing-hall.webp" width="1400" height="1050" loading="lazy"
+               alt="A large indoor climbing hall with tall roped walls, colourful holds and several climbers.">
+          <figcaption>My local climbing hall.</figcaption>
+        </figure>
+
+        <!-- Hidden by CSS until script.js runs, so they never appear as buttons that
+             do nothing. -->
+        <button class="gallery__arrow gallery__arrow--prev" type="button" aria-label="Previous photo">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="gallery__arrow gallery__arrow--next" type="button" aria-label="Next photo">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Off-screen, but read aloud when the slide changes so someone using a screen
+           reader knows the picture moved. "polite" waits for a pause rather than
+           interrupting whatever is being read. -->
+      <p class="visually-hidden" aria-live="polite" id="gallery-status"></p>
+    </section>
+
+    <section id="about" aria-labelledby="about-heading">
+      <h2 id="about-heading">About</h2>
+      
+      <p>
+      Recent Master's graduate in Digital Business &amp; Data, working at the intersection of data science and commercial decision making. I'm drawn to the technical side of the work: building things, especially automations and apps that make life easier. This is what pulls me toward analyst and analyst adjacent roles. Most recently, I wrapped up a Supply Chain Analytics internship at Nike EMEA, turning data into actionable insights, building automated reporting, and partnering closely with stakeholders. Comfortable across Python, Tableau, Excel, SQL, and a variety of AI tools for building agents and coding.
+      </p>
+      <p>
+      Outside of work, I climb, currently bouldering 6c and aiming for 7a by the end of the year. I also play guitar, something I picked up at 10, and played in a few alt rock bands along the way, though these days my listening ranges wider, from funk and jazz to electronic. I also enjoy photography, more specifically candid shots of friends whenever we hang out. I'm also a nerd for computers, AI, and video games, and still make time for tennis, padel, and hiking when I can.  
+      </p>
+
+    </section>
+
+    <section id="experience" aria-labelledby="experience-heading">
+      <h2 id="experience-heading">Experience</h2>
+
+      <article class="experience-item">
+        <h3>Supply Chain Analytics Intern <span class="experience-item__company">— Nike, EMEA</span></h3>
+        <p class="experience-item__meta">Hilversum Netherlands · Full-time · Feb–Aug 2026</p>
+        <ul>
+          <li>Partnered with supply chain stakeholders to turn live data into actionable insights across EMEA</li>
+          <li>Queried and analysed orderbook data with SQL to identify risks and opportunities</li>
+          <li>Built automated Tableau reporting/dashboards for KPIs, inventory position, and asset performance</li>
+          <li>Developed and piloted AI-enabled analytical tools for faster self-serve insights</li>
+          <li>Bridged technical data teams and business stakeholders</li>
+        </ul>
+      </article>
+
+      <article class="experience-item">
+        <h3>Data &amp; CRM Assistant <span class="experience-item__company">— L'Oréal Benelux</span></h3>
+        <p class="experience-item__meta">Hoofddorp Netherlands · Full-time · Mar–Sep 2024</p>
+        <ul>
+          <li>Analysed B2B customer/behavioral data across 20,000+ clients for revenue-oriented recommendations</li>
+          <li>Built segmentation logic and personalised CRM campaigns with A/B testing</li>
+          <li>Used Power BI and Looker Studio dashboards to track performance</li>
+          <li>Automated Excel workflows with VBA macros — cut a manual task from 50 clicks to 5 (saving 2 hrs/week)</li>
+          <li>Used SQL for segmentation and GDPR compliance checks</li>
+          <li>Agile/SCRUM cross-functional delivery</li>
+        </ul>
+      </article>
+
+      <article class="experience-item">
+        <h3>Sales &amp; Client Hospitality <span class="experience-item__company">— Friendship, Amsterdam</span></h3>
+        <p class="experience-item__meta">Amsterdam Netherlands · Part-time · 2022–2024</p>
+        <ul>
+          <li>Delivered engaging tours and presentations in high-pressure, client-facing settings</li>
+        </ul>
+      </article>
+
+      <!-- Education folded in as the closing entries of the same timeline rather than a separate
+           section — agreed with Alexander in Phase 2 to avoid a 7th section for just two lines. -->
+      <article class="experience-item">
+        <h3>MSc Business Administration, Digital Business &amp; Data <span class="experience-item__company">— University of Amsterdam</span></h3>
+        <p class="experience-item__meta">2024–2025 · GPA 7.9</p>
+      </article>
+
+      <article class="experience-item">
+        <h3>BSc Business Administration <span class="experience-item__company">— University of Amsterdam</span></h3>
+        <p class="experience-item__meta">2020–2023 · GPA 7.1</p>
+      </article>
+    </section>
+
+    <section id="skills" aria-labelledby="skills-heading">
+      <h2 id="skills-heading">Skills</h2>
+
+      <!-- Regrouped so each heading is a distinct kind of skill. The old "Tools"
+           group was dropped: it mixed BI platforms (which belong with the other
+           visualisation work) with Office apps, which aren't worth claiming. -->
+      <div class="skill-group">
+        <h3>Data &amp; Analytics</h3>
+        <ul role="list">
+          <li>SQL</li>
+          <li>Python (pandas)</li>
+          <li>Advanced Excel (Macros, VBA)</li>
+          <li>Predictive modelling (ML)</li>
+          <li>A/B testing &amp; experiment design</li>
+          <li>Customer segmentation</li>
+        </ul>
+      </div>
+
+      <div class="skill-group">
+        <h3>Visualisation &amp; Reporting</h3>
+        <ul role="list">
+          <li>Tableau</li>
+          <li>Power BI</li>
+          <li>Looker Studio</li>
+          <li>Dashboard design</li>
+          <li>KPI &amp; performance reporting</li>
+        </ul>
+      </div>
+
+      <div class="skill-group">
+        <h3>AI &amp; Automation</h3>
+        <ul role="list">
+          <li>LLM applications for business</li>
+          <li>Building AI agents</li>
+          <li>Claude, ChatGPT, Copilot</li>
+          <li>Cursor</li>
+          <li>Workflow automation (Python, VBA)</li>
+        </ul>
+      </div>
+
+      <div class="skill-group">
+        <h3>Web Development</h3>
+        <ul role="list">
+          <li>HTML &amp; CSS</li>
+          <li>JavaScript</li>
+          <li>Git &amp; version control</li>
+        </ul>
+      </div>
+
+      <div class="skill-group">
+        <h3>Working &amp; Communication</h3>
+        <ul role="list">
+          <li>Stakeholder management</li>
+          <li>Requirements gathering</li>
+          <li>Public speaking &amp; presenting</li>
+          <li>Translating technical concepts for non-technical audiences</li>
+          <li>Agile / SCRUM</li>
+          <li>GDPR compliance</li>
+        </ul>
+      </div>
+
+      <div class="skill-group">
+        <h3>Languages</h3>
+        <ul role="list">
+          <li>English (native)</li>
+          <li>French (fluent)</li>
+          <li>Spanish (fluent)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="projects" aria-labelledby="projects-heading">
+      <h2 id="projects-heading">Projects</h2>
+
+      <!-- Every card image ships from scripts/optimise-photos.py at exactly 900x600 (3:2).
+           width/height are the file's real pixel size, not the displayed size — they let the
+           browser reserve the right shape before the file arrives, so the page doesn't lurch as
+           images load. loading="lazy" holds each download back until the image is near the
+           screen; the whole section sits well below the fold, so none of the six competes with
+           the initial page load. The alt text describes what each image shows, because the
+           images carry information about the project rather than just decorating the card. -->
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/dashboard-of-dashboards.webp"
+             width="900" height="600" loading="lazy"
+             alt="Tableau dashboard showing workbook counts, a dashboard freshness bar at 92.77% fresh, a site creator list and a usage-over-time chart.">
+        <h3>Dashboard of Dashboards <span class="project-card__tag">Nike EMEA</span></h3>
+        <p>A Tableau dashboard built on Tableau's own metadata, giving a central analytics team oversight of its entire dashboard portfolio — what exists, who owns it, and what's actually being used.</p>
+      </article>
+
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/churn-model.webp"
+             width="900" height="600" loading="lazy"
+             alt="Decision tree diagram branching on house value, overage, leftover minutes and income, ending in churn or stay probabilities.">
+        <h3>Customer Churn Prediction <span class="project-card__tag">UvA</span></h3>
+        <p>Tree-based ML classification model in Python, predicting customer churn from behavioral data.</p>
+      </article>
+
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/digimpact.webp"
+             width="900" height="600" loading="lazy"
+             alt="Digimpact Amsterdam 2024 banner: a glowing lotus rising over the Amsterdam canals, with the Amsterdam Business School logo.">
+        <h3>DigImpact Hackathon — Nestlé <span class="project-card__tag">Winner, Nov 2024</span></h3>
+        <p>Used predictive analytics to model peak coffee consumption periods as part of the winning team.</p>
+      </article>
+
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/ab-test.webp"
+             width="900" height="600" loading="lazy"
+             alt="Diagram of an A/B test splitting users between two page variants, option A converting at 17% and option B at 25%.">
+        <h3>Master's Thesis: Data-Driven Personalisation <span class="project-card__tag">UvA</span></h3>
+        <p>Field experiment on optimising marketing campaigns through personalisation, using statistical models and real L'Oréal data.</p>
+      </article>
+
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/oyster-yachts.webp"
+             width="900" height="600" loading="lazy"
+             alt="An Oyster sailing yacht under full sail off a green coastline, two crew at the helm and a red ensign flying.">
+        <h3>Oyster Yachts — Motivational Analysis</h3>
+        <p>Survey-based study analysing motivational drivers for a luxury yacht brand.</p>
+      </article>
+
+      <article class="project-card">
+        <img class="project-card__media" src="assets/images/this-website.webp"
+             width="900" height="600" loading="lazy"
+             alt="A browser window containing the HTML5, CSS3 and JavaScript logos side by side.">
+        <h3>This Website</h3>
+        <p>Designed and built from scratch in HTML, CSS and JavaScript. no template, no page builder. Made with AI, every design and technical decision reasoned through and documented rather than accepted off the shelf.</p>
+      </article>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-heading">
+      <h2 id="contact-heading">Contact</h2>
+
+      <p class="contact-intro">
+        I'm currently looking for my next role. If you think I'd be a good fit for your
+        team, or you just want to talk data, dashboards or climbing, connect and message me on
+        LinkedIn, it's the quickest way to reach me.
+      </p>
+
+      <!-- Two ranked actions rather than a contact form. The form and its Express backend
+           were cancelled in Phase 6 so the site can stay fully static; see CLAUDE.md before
+           adding either back. The filled button is the primary route in, the outlined one
+           secondary, so the main action is obvious without hiding the other. -->
+      <div class="contact-actions">
+        <a class="button" href="https://www.linkedin.com/in/alexander-musselwhite-7a7152214"
+           target="_blank" rel="noopener">
+          Message me on LinkedIn<span class="visually-hidden"> (opens in a new tab)</span>
+        </a>
+
+        <!-- download tells the browser to save the file instead of navigating to it. -->
+        <a class="button button--secondary" href="assets/Alexander-Musselwhite-CV.pdf" download>Download Resume</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Alexander Musselwhite</p>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
