@@ -1,7 +1,6 @@
 # Alexander Musselwhite — Personal Website
 
-Source for my portfolio site. Hand-written HTML, CSS and JavaScript — no framework, no build
-step, no runtime dependencies.
+Source for my portfolio site. Hand-written HTML, CSS and JavaScript.
 
 **Live site:** https://mrmusselwhite.github.io/Alexander-Musselwhite-Portfolio--Public/
 
